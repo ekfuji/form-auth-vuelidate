@@ -1,12 +1,29 @@
 <template>
     <form action="#" @submit.prevent="submit" class="sign-in-htm">
         <div class="group">
-            <label for="sign-in-user" class="label">Username</label>
-            <input id="sign-in-user" type="text" class="input" v-model="username">
+            <label :class="{ invalid: $v.username.$invalid && $v.username.$dirty }" for="sign-in-user" class="label">Username</label>
+            <input 
+            :class="{ invalid: $v.username.$invalid && $v.username.$dirty }" 
+            id="sign-in-user" 
+            type="text" 
+            class="input" 
+            v-model="username"
+            @input="$v.username.$touch()"
+            >
+            <!-- O $touch do validate vai ficar observando o campo
+                Já o dirty é um boolean que sinaliza se ocorreu alguma ação no campo 
+             -->
         </div>
         <div class="group">
-            <label for="sign-in-pass" class="label">Password</label>
-            <input id="sign-in-pass" type="password" class="input" data-type="password" v-model="password">
+            <label :class="{ invalid: $v.password.$invalid && $v.password.$dirty }" for="sign-in-pass" class="label">Password</label>
+            <input 
+            :class="{ invalid: $v.password.$invalid && $v.password.$dirty }" 
+            id="sign-in-pass" 
+            type="password" 
+            class="input" 
+            data-type="password" 
+            v-model="password"
+            @input="$v.password.$touch()">
         </div>
         <div class="group">
             <input id="check" type="checkbox" class="check" v-model="keepSignedIn">
@@ -23,6 +40,7 @@
 </template>
 
 <script>
+import { required } from 'vuelidate/lib/validators'
 export default {
     data: () => ({
         username: '',
@@ -31,6 +49,14 @@ export default {
     }),
     mounted(){
         this.$bus.$on('navigate', this.reset);
+    },
+    validations: {
+        username: {
+            required
+        },
+        password: {
+            required
+        },
     },
     methods: {
         submit() {
@@ -42,9 +68,14 @@ export default {
             //  Nestes casos podemos usar bibliotecas como a Lodash que tem um método chamado cloneDeep
             // que vai percorrer seu objeto recursivamente clonando todas propriedades de todos os objetos e arrays
             // que estiverem dentro dele.
-            this.$emit("doSignIn", { ...this.$data });
             //Outra maneira de fazer isso, de uma forma state foreign de clonar um objeto antes do ES215.
             // JSON.encode(JSON.stringify(this.$data))
+            if(!this.$v.$invalid){
+                this.$emit("doSignIn", { ...this.$data });
+            } else {
+                this.$v.$touch();
+            }
+            
 
         },
         reset(selected){
@@ -52,12 +83,12 @@ export default {
                 this.username = '';
                 this.password = '';
                 this.keepSignedIn = true;
+                this.$v.$reset();
             } 
         }
-    }
+    },
 }
 </script>
 
 <style>
-
 </style>

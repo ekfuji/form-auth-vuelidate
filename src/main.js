@@ -4,9 +4,12 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import EventBus from "./plugins/EventBus.js"
+Vue.use(EventBus)
+import Vuelidate from 'vuelidate'
+Vue.use(Vuelidate)
 
 Vue.config.productionTip = false
-Vue.use(EventBus)
+
 
 new Vue({
   router,
